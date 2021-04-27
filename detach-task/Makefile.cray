@@ -1,0 +1,18 @@
+CC ?= cc
+CXX ?= CC
+F90 ?= ftn
+MPICC ?= cc
+MPICXX ?= CC
+MPIF90 ?= ftn
+
+all: test-fortran test-c
+
+test-fortran: test-detach-task.f90 libdetach_task.so
+	$(F90) -fopenmp test-detach-task.f90 -L. -Wl,--rpath,. -ldetach_task -o test-fortran
+
+test-c: test-detach-task.c libdetach_task.so
+	$(CC) -fopenmp test-detach-task.c -L. -Wl,--rpath,. -ldetach_task -o test-c
+
+
+libdetach_task.so: c_detach_task.c
+	$(CC) -fopenmp -shared -fPIC c_detach_task.c -o libdetach_task.so
