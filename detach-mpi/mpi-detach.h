@@ -43,10 +43,7 @@ DLL_PUBLIC int MPIX_Detach(MPI_Request *request, MPIX_Detach_callback *callback,
                 void *data);
 
 DLL_PUBLIC void mpix_detach_(MPI_Fint *request, MPIX_Detach_callback *callback,
-                void *data, int* err){
-  MPI_Request req = MPI_Request_f2c(*request);
-  *err = MPIX_Detach(&req, callback, data);
-}
+                void *data, int* err);
 
 DLL_PUBLIC int MPIX_Detach_status(MPI_Request *request,
                        MPIX_Detach_callback_status *callback, void *data);

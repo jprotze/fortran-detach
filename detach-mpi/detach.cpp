@@ -47,7 +47,7 @@ struct singleRequest {
   }
 };
 
-static inline void copyRequests(MPI_Request *inReq, MPI_Request *outReq, int count, bool persistent){
+static inline void copyRequests(MPI_Request *outReq, MPI_Request *inReq, int count, bool persistent){
   if(persistent)
     for (int i = 0; i < count; i++) {
       outReq[i] = inReq[i];
@@ -414,6 +414,12 @@ int MPIX_Start_detached_all_status(int count, MPI_Request array_of_requests[],
   }
   delete[] statuses;
   return MPI_SUCCESS;
+}
+
+DLL_PUBLIC void mpix_detach_(MPI_Fint *request, MPIX_Detach_callback *callback,
+                void *data, int* err){
+  MPI_Request req = MPI_Request_f2c(*request);
+  *err = MPIX_Detach(&req, callback, data);
 }
 
 DLL_PUBLIC int MPI_Finalize() {
