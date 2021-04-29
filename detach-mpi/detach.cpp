@@ -422,6 +422,14 @@ DLL_PUBLIC void mpix_detach_(MPI_Fint *request, MPIX_Detach_callback *callback,
   *err = MPIX_Detach(&req, callback, data);
 }
 
+DLL_PUBLIC void mpix_detach_all_(int* count, MPI_Fint *requests, MPIX_Detach_callback *callback,
+                void *data, int* err){
+  MPI_Request reqs[*count];
+  for (int i=0; i<*count; i++)
+    reqs[i] = MPI_Request_f2c(requests[i]);
+  *err = MPIX_Detach_all(*count, reqs, callback, data);
+}
+
 DLL_PUBLIC int MPI_Finalize() {
   // we need to make sure, all communication is finished
   // before calling MPI_Finalize

@@ -39,11 +39,14 @@ typedef MPIX_Detach_all_statuses_function MPIX_Detach_all_callback_statuses;
 extern "C" {
 #endif
 
-DLL_PUBLIC int MPIX_Detach(MPI_Request *request, MPIX_Detach_callback *callback,
-                void *data);
-
 DLL_PUBLIC void mpix_detach_(MPI_Fint *request, MPIX_Detach_callback *callback,
                 void *data, int* err);
+
+DLL_PUBLIC void mpix_detach_all_(int *count, MPI_Fint *request, MPIX_Detach_callback *callback,
+                void *data, int* err);
+
+DLL_PUBLIC int MPIX_Detach(MPI_Request *request, MPIX_Detach_callback *callback,
+                void *data);
 
 DLL_PUBLIC int MPIX_Detach_status(MPI_Request *request,
                        MPIX_Detach_callback_status *callback, void *data);
