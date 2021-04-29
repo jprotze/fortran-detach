@@ -22,12 +22,15 @@ program test
     integer(omp_event_handle_kind) :: event
     integer :: request
 
-    integer ::ierr, irank, isize, win, pe_target
+    integer ::ierr, irank, isize, provided
 
     integer(kind = mpi_address_kind)::wsize, targ_disp
-    !external :: mpix_detach
 
-    CALL MPI_INIT(ierr)
+    CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE, provided, ierr)
+    IF (provided .LT. MPI_THREAD_MULTIPLE) THEN
+        WRITE(*,'(A)') 'The threading support level is lesser than that demanded.'
+        CALL MPI_Abort(MPI_COMM_WORLD, -1, ierr)
+    END IF
 
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, irank, ierr)
 

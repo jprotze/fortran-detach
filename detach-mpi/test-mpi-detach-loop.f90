@@ -30,7 +30,7 @@ program test
     integer(omp_event_handle_kind) :: oevent, ievent
     integer :: request, comm(0:4)
 
-    integer ::ierr, irank, isize, win, pe_target
+    integer ::ierr, irank, isize, provided
 
     integer(kind = mpi_address_kind)::wsize, targ_disp
     integer :: A(0:4)
@@ -38,7 +38,12 @@ program test
     A = (/1,2,3,4,5/)
     B = -1
 
-    CALL MPI_INIT(ierr)
+    CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE, provided, ierr)
+    IF (provided .LT. MPI_THREAD_MULTIPLE) THEN
+        WRITE(*,'(A)') 'The threading support level is lesser than that demanded.'
+        CALL MPI_Abort(MPI_COMM_WORLD, -1, ierr)
+    END IF
+
 
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, irank, ierr)
 
@@ -49,30 +54,34 @@ program test
 
     print *, "Hello from pe", irank, base
 
-    !$omp parallel num_threads(2) private(ierr)
+    !$omp parallel num_threads(3) private(ierr)
     !$omp single
     DO i=0,14
       j = modulo(i,5)
     !$omp task detach(oevent) depend(inout:A(j)) firstprivate(j, ievent)
           print *, "Outer Task j=", j
 		!$omp task detach(ievent) depend(inout:A(j))
+		  print *, "Inner Task1 j=", j
           call sendrecv_detach(A(j), 1, MPI_INTEGER, isize-irank-1, 1, &
                                B(j), 1, MPI_INTEGER, isize-irank-1, 1, &
                                comm(j), omp_fulfill_event, ievent, ierr)
 		!$omp end task
 		!$omp task detach(ievent) depend(inout:A(j))
+		  print *, "Inner Task2 j=", j
 		  A(j) = A(j) + B(j)
           call sendrecv_detach(A(j), 1, MPI_INTEGER, isize-irank-1, 1, &
                                B(j), 1, MPI_INTEGER, isize-irank-1, 1, &
                                comm(j), omp_fulfill_event, ievent, ierr)
 		!$omp end task
 		!$omp task detach(ievent) depend(inout:A(j))
+		  print *, "Inner Task3 j=", j
 		  A(j) = A(j) + B(j)
           call sendrecv_detach(A(j), 1, MPI_INTEGER, isize-irank-1, 1, &
                                B(j), 1, MPI_INTEGER, isize-irank-1, 1, &
                                comm(j), omp_fulfill_event, ievent, ierr)
 		!$omp end task
 		!$omp task firstprivate(oevent) depend(inout:A(j))
+		  print *, "Inner Task4 j=", j
 		  A(j) = A(j) + B(j)
           call sendrecv_detach(A(j), 1, MPI_INTEGER, isize-irank-1, 1, &
                                B(j), 1, MPI_INTEGER, isize-irank-1, 1, &
