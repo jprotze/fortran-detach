@@ -58,11 +58,11 @@ int main(int argc, char **argv) {
 
   std::thread runThread{run};
 
-#pragma omp parallel num_threads(12)
+#pragma omp parallel num_threads(4)
 #pragma omp single
   {
-    for (int i = 0; i < 15; i++) {
-      int j = i % 5;
+    for (int i = 0; i < 4; i++) {
+      int j = i % 2;
 #pragma omp task depend(inout : A[j], B[j]) detach(oevent)
       {
 #pragma omp task depend(inout : A[j], B[j]) detach(ievent)

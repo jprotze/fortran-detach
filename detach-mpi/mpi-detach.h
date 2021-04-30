@@ -42,8 +42,12 @@ extern "C" {
 DLL_PUBLIC void mpix_detach_(MPI_Fint *request, MPIX_Detach_callback *callback,
                 void *data, int* err);
 
+DLL_PUBLIC void mpix_detach_task_(MPI_Fint *request, void *data, int* err);
+
 DLL_PUBLIC void mpix_detach_all_(int *count, MPI_Fint *request, MPIX_Detach_callback *callback,
                 void *data, int* err);
+
+DLL_PUBLIC void mpix_detach_all_task_(int *count, MPI_Fint *request, void *data, int* err);
 
 DLL_PUBLIC int MPIX_Detach(MPI_Request *request, MPIX_Detach_callback *callback,
                 void *data);

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <thread>
+#include <omp.h>
 
 using namespace std::chrono_literals;
 
@@ -429,6 +430,24 @@ DLL_PUBLIC void mpix_detach_all_(int* count, MPI_Fint *requests, MPIX_Detach_cal
     reqs[i] = MPI_Request_f2c(requests[i]);
   *err = MPIX_Detach_all(*count, reqs, callback, data);
 }
+
+static void ompFulfillEvent(void* data){
+  omp_fulfill_event((omp_event_handle_t)reinterpret_cast<std::uintptr_t>(data));
+}
+
+DLL_PUBLIC void mpix_detach_task_(MPI_Fint *request, void *data, int* err){
+  MPI_Request req = MPI_Request_f2c(*request);
+  *err = MPIX_Detach(&req, ompFulfillEvent, data);
+}
+
+DLL_PUBLIC void mpix_detach_all_task_(int* count, MPI_Fint *requests, void *data, int* err){
+  MPI_Request reqs[*count];
+  for (int i=0; i<*count; i++)
+    reqs[i] = MPI_Request_f2c(requests[i]);
+  *err = MPIX_Detach_all(*count, reqs, ompFulfillEvent, data);
+}
+
+
 
 DLL_PUBLIC int MPI_Finalize() {
   // we need to make sure, all communication is finished

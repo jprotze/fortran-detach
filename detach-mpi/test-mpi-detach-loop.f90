@@ -15,6 +15,19 @@ module mpi_detach
         integer (kind=omp_event_handle_kind), &
           value, intent(in) :: event
       end subroutine mpix_detach_all
+      subroutine mpix_detach_task (request, event, ierr)
+        use omp_lib_kinds
+        integer :: request, ierr
+        integer (kind=omp_event_handle_kind), &
+          value, intent(in) :: event
+      end subroutine mpix_detach_task
+      subroutine mpix_detach_all_task (count, requests, event, ierr)
+        use omp_lib_kinds
+        integer :: requests(*)
+        integer :: count, ierr
+        integer (kind=omp_event_handle_kind), &
+          value, intent(in) :: event
+      end subroutine mpix_detach_all_task
     end interface
 end module
 program test
@@ -117,6 +130,6 @@ INTEGER (kind=omp_event_handle_kind), intent(in) :: cbdata
 INTEGER :: reqs(0:1)
 call MPI_Irecv(recvbuf, recvcount, recvtype, source, recvtag, comm, reqs(1), ierr);
 call MPI_Isend(sendbuf, sendcount, sendtype, dest, sendtag, comm, reqs(0), ierr);
-call MPIX_Detach_all(2, reqs, callback, cbdata, ierr);
+call MPIX_Detach_all_task(2, reqs, cbdata, ierr);
 end subroutine sendrecv_detach
 
