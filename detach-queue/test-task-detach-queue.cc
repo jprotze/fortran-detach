@@ -58,21 +58,21 @@ int main(int argc, char **argv) {
 
   std::thread runThread{run};
 
-#pragma omp parallel num_threads(4)
+#pragma omp parallel num_threads(4) // implicit shared(oevent, ievent)
 #pragma omp single
   {
     for (int i = 0; i < 4; i++) {
       int j = i % 2;
-#pragma omp task depend(inout : A[j], B[j]) detach(oevent)
+#pragma omp task depend(inout : A[j], B[j]) detach(oevent) // implicit shared(ievent) firstprivate(oevent)
       {
-#pragma omp task depend(inout : A[j], B[j]) detach(ievent)
+#pragma omp task depend(inout : A[j], B[j]) detach(ievent) // data race on ievent ?
         queue_detach(A + j, B + j, ievent, 9ms);
-#pragma omp task depend(inout : A[j], B[j]) detach(ievent)
+#pragma omp task depend(inout : A[j], B[j]) detach(ievent) // data race on ievent ?
         {
           A[j] += B[j];
           queue_detach(A + j, B + j, ievent, 5ms);
         }
-#pragma omp task depend(inout : A[j], B[j]) detach(ievent)
+#pragma omp task depend(inout : A[j], B[j]) detach(ievent) // data race on ievent ?
         {
           A[j] += B[j];
           queue_detach(A + j, B + j, ievent, 11ms);
